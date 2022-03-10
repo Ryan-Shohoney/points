@@ -2,7 +2,15 @@
 /dist
 /node_modules
 /dist-test
-/.yarn
+
+# yarn2
+.yarn/*
+.pnp.*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
 
 # Logs
 logs
