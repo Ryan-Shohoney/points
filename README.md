@@ -6,11 +6,12 @@ and persistence through [Redis](https://redis.io/).
 ## Pre-requisites
 You'll need to install a few things before we get started.  Below are links to each tool and how to install them:
  - [Node.js LTS](https://nodejs.org/en/download/) 
-   - you can optionally satisfy this requirement by using some form of a node version switcher, i.e. `nvm`, `nvm-windows`, or `nvs`. 
+   - you can optionally satisfy this requirement by using some form of a node version switcher, i.e. `nvm`, `nvm-windows`, or `nvs`.    
  - [Docker](https://docs.docker.com/get-docker/)
    - As noted, Docker Desktop for both Mac and Windows include docker compose.  If, because of licensing reasons you 
       are unable to use Docker Desktop, you can follow this [guide](https://docs.docker.com/compose/install/)
- - [Yarn](https://yarnpkg.com/getting-started/install) (npm should work, but this project was generated and tooled with Yarn in mind)  
+ - [Yarn](https://yarnpkg.com/getting-started/install) (npm should work, but this project was generated and tooled with Yarn in mind)
+   - This documentation is for yarn 2.  If you're migrating from yarn 1 -> yarn 2, follow this [guide](https://yarnpkg.com/getting-started/migration)
 
 ## Installation
 Now that you have the pre-requisites complete, you should be able to simply install the application!

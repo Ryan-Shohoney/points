@@ -19,7 +19,7 @@
     "test:watch": "jest --watch",
     "test:cov": "yarn docker && jest --config jest-cov.json --coverage --runInBand",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "yarn docker && jest --config jest-e2e.json",
+    "test:e2e": "yarn docker && jest --config jest-e2e.json --runInBand",
     "predocker": "docker compose down --remove-orphans --volumes",
     "docker": "docker compose up -d"
   },
@@ -62,5 +62,6 @@
     "ts-node": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
     "typescript": "^4.3.5"
-  }
+  },
+  "packageManager": "yarn@3.2.0"
 }
