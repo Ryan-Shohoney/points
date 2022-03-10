@@ -1,29 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { v4 as uuid } from 'uuid';
 import { RedisStore } from '../../store/redis-store';
 import { IRepository } from '../../store/store.types';
-import { Ledger, RewardDto, PaymentDto } from './payment.dto';
+import { RewardDto, PaymentDto } from './payment.dto';
 
 @Injectable()
-export class PaymentRepository implements IRepository<Ledger> {
-  private readonly keyPrefix = 'ledger:';
+export class PaymentRepository implements IRepository<RewardDto | Array<RewardDto>> {
+  public readonly keyPrefix = 'payment';
   constructor(private readonly dataStore: RedisStore) {}
 
   async getCurrentPayer(id: string): Promise<RewardDto> {
-    const payer = await this.dataStore.client.lrange(
+    const payer = await this.dataStore.client.zrange(
       this.generateKey(id),
-      -1,
-      -1,
+      0,
+      0,
     );
     return JSON.parse(payer[0]);
   }
 
   async updateCurrentPayer(id: string, payment: PaymentDto): Promise<boolean> {
-    if (payment.amount === 0) {
-      await this.dataStore.client.rpop(this.generateKey(id));
-    } else {
-      await this.dataStore.client.lset(
+    const entry = await this.dataStore.client.zpopmin(this.generateKey(id), 1)
+    if(payment.amount > 0) {
+      const newEntry = JSON.parse(entry[0]) as RewardDto;
+      await this.dataStore.client.zadd(
         this.generateKey(id),
-        -1,
+        newEntry.timestampMS,
         JSON.stringify(payment),
       );
     }
@@ -36,25 +37,30 @@ export class PaymentRepository implements IRepository<Ledger> {
     return numDeleted === 1;
   }
 
-  async findById(id: string): Promise<Ledger> {
-    const ledger = await this.dataStore.client.lrange(
+  async findById(id: string): Promise<Array<RewardDto>> {
+    const ledger = await this.dataStore.client.zrange(
       this.generateKey(id),
       0,
       -1,
     );
-    return ledger.map((payment) => JSON.parse(payment));
+    return ledger.map(x => JSON.parse(x) as RewardDto);
   }
 
-  async insert(entity: Ledger): Promise<boolean> {
-    const { userId, ...rest } = entity[0];
-    const numInserted = await this.dataStore.client.lpush(
-      this.generateKey(userId),
-      JSON.stringify(rest),
+  async insert(entity: RewardDto): Promise<string> {
+    const ledgerId = uuid();
+    return this.update(ledgerId, entity);
+  }
+
+  async update(id: string, entity: RewardDto): Promise<any> {
+    await this.dataStore.client.zadd(
+      this.generateKey(id),
+      entity.timestampMS,
+      JSON.stringify({ ...entity, receivedTs: Date.now()}),
     );
-    return numInserted > 0;
+    return id;
   }
 
   private generateKey(slug: string) {
-    return `${this.keyPrefix}${slug}`;
+    return `${this.keyPrefix}:${slug}`;
   }
 }

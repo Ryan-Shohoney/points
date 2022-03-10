@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {LedgerRepository} from '../common/repository/ledger/ledger-repository.provider';
 import { PaymentRepository } from '../common/repository/payment/payment-repository.provider';
 import { UserRepository } from '../common/repository/user/user-repository.provider';
 import { UpdateUserDto, UserDto } from '../common/repository/user/user.dto';
@@ -8,21 +9,20 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly paymentRepository: PaymentRepository,
+    private readonly ledgerRepository: LedgerRepository,
   ) {}
 
   public async addUser(user: UpdateUserDto): Promise<string> {
-    const id = await this.userRepository.insert(user);
-    if (user.points > 0) {
-      await this.paymentRepository.insert([
-        {
-          userId: id,
-          amount: user.points,
-          payer: 'Fetch Rewards',
-        },
-      ]);
-    }
-
-    return id;
+    const userId = await this.userRepository.insert(user);
+    const paymentId = await this.paymentRepository.insert(
+      {
+        amount: user.points,
+        payer: 'promotionalPoints',
+        timestampMS: 1, // Set to basically the beginning of the unix epoch.  Spend promo points right away.  Alternatively, set to the max of the epoch to keep the "cost" off of the books
+      },
+    );
+    await this.ledgerRepository.insert({ userId, paymentId });
+    return userId;
   }
 
   public async getUserById(id: string): Promise<UserDto> {
@@ -45,6 +45,7 @@ export class UserService {
     const [usersDel] = await Promise.all([
       this.userRepository.delete(id),
       this.paymentRepository.delete(id),
+      this.ledgerRepository.delete(id),
     ]);
     if (usersDel === false) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);

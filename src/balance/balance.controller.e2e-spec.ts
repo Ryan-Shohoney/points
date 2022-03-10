@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid';
 import { DefaultValidationPipeOptions } from '../main.types';
 import { UserModule } from '../user/user.module';
 import { BalanceModule } from './balance.module';
-
+const ONE_DAY = 1000 * 60 * 60 * 24;
 describe('E2E: BalanceController', () => {
   let app: INestApplication;
   beforeEach(async () => {
@@ -60,15 +60,15 @@ describe('E2E: BalanceController', () => {
 
   it('Adds payments: /balance/:id/reward (PUT)', async () => {
     await request(app.getHttpServer()).put(`/balance/${userId}/reward`).send({
-      userId,
       amount: 500,
       payer: 'NestJS',
+      timestampMS: Date.now() - ONE_DAY
     });
 
     await request(app.getHttpServer()).put(`/balance/${userId}/reward`).send({
-      userId,
       amount: 200,
       payer: 'NodeJS',
+      timestampMS: Date.now()
     });
 
     return request(app.getHttpServer())

@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class UserRepository implements IRepository<UserDto> {
-  private readonly keyPrefix = 'user';
+  public readonly keyPrefix = 'user';
   constructor(private readonly dataStore: RedisStore) {}
 
   async delete(id: string): Promise<boolean> {
@@ -18,7 +18,7 @@ export class UserRepository implements IRepository<UserDto> {
       return false;
     }
     const [result] = await Promise.all([
-      this.dataStore.client.del(id),
+      this.dataStore.client.del(this.generateKey(id)),
       this.dataStore.client.srem(this.keyPrefix, id),
     ]);
 
@@ -26,7 +26,7 @@ export class UserRepository implements IRepository<UserDto> {
   }
 
   async findById(id: string): Promise<UserDto> {
-    const user = await this.dataStore.client.hgetall(id);
+    const user = await this.dataStore.client.hgetall(this.generateKey(id));
     return user.id ? this.coerce(user) : null;
   }
 
@@ -38,7 +38,7 @@ export class UserRepository implements IRepository<UserDto> {
     const id = uuid();
     await Promise.all([
       this.dataStore.client.sadd(this.keyPrefix, id),
-      this.dataStore.client.hset(id, { firstName, lastName, points, id }),
+      this.dataStore.client.hset(this.generateKey(id), { firstName, lastName, points, id }),
     ]);
 
     return id;
@@ -47,14 +47,14 @@ export class UserRepository implements IRepository<UserDto> {
   async list(): Promise<Array<UserDto>> {
     const keys = await this.dataStore.client.smembers(this.keyPrefix);
     const pipe = this.dataStore.client.pipeline();
-    keys.forEach((k) => pipe.hgetall(k));
+    keys.forEach((k) => pipe.hgetall(this.generateKey(k)));
     return (await pipe.exec()).map((v) => this.coerce(v[1]));
   }
 
   async update(id: string, entity: UpdateUserDto): Promise<boolean> {
-    const current = await this.dataStore.client.hgetall(id);
+    const current = await this.dataStore.client.hgetall(this.generateKey(id));
     const merged = { ...current, ...entity };
-    const numUpdated = await this.dataStore.client.hset(id, merged);
+    const numUpdated = await this.dataStore.client.hset(this.generateKey(id), merged);
     return numUpdated > 0;
   }
 
@@ -65,5 +65,9 @@ export class UserRepository implements IRepository<UserDto> {
       id: entity.id,
       points: parseInt(entity.points.toString(), 10),
     };
+  }
+
+  private generateKey(k: string): string {
+    return `${this.keyPrefix}:${k}`
   }
 }
