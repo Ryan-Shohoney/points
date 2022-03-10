@@ -6,7 +6,7 @@ and persistence through [Redis](https://redis.io/).
 ## Pre-requisites
 You'll need to install a few things before we get started.  Below are links to each tool and how to install them:
  - [Node.js LTS](https://nodejs.org/en/download/) 
-   - you can optionally satisfy this requirement by using `nvm` alongside an existing installation of node and npm
+   - you can optionally satisfy this requirement by using some form of a node version switcher, i.e. `nvm`, `nvm-windows`, or `nvs`. 
  - [Docker](https://docs.docker.com/get-docker/)
    - As noted, Docker Desktop for both Mac and Windows include docker compose.  If, because of licensing reasons you 
       are unable to use Docker Desktop, you can follow this [guide](https://docs.docker.com/compose/install/)
