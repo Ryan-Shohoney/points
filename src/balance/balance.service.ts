@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {LedgerRepository} from '../common/repository/ledger/ledger-repository.provider';
 import { PaymentRepository } from '../common/repository/payment/payment-repository.provider';
-import { RewardDto } from '../common/repository/payment/payment.dto';
+import {PaymentResponseDto, RewardDto} from '../common/repository/payment/payment.dto';
 import { UserRepository } from '../common/repository/user/user-repository.provider';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class BalanceService {
     return payment;
   }
 
-  async reduceBalance(id: string, amount: number) {
+  async reduceBalance(id: string, amount: number): Promise<Array<PaymentResponseDto>> {
     const { userId, paymentId } = await this.ledgerRepository.findById(id);
     if (!userId) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -44,6 +44,7 @@ export class BalanceService {
       );
     }
     let currentAmountDeducted = 0;
+    let response: Array<PaymentResponseDto> = [];
     while (currentAmountDeducted < amount) {
       const remainingPayment = amount - currentAmountDeducted;
       const currentPayer = await this.paymentRepository.getCurrentPayer(paymentId);
@@ -56,12 +57,19 @@ export class BalanceService {
         ...currentPayer,
         amount: currentPayer.amount - deduction,
       };
+      const responseObject: PaymentResponseDto = {
+        deduction,
+        balance: updatedPayer.amount,
+        payer: updatedPayer.payer,
+      };
+      response.push(responseObject)
       await this.paymentRepository.updateCurrentPayer(paymentId, updatedPayer);
     }
     await this.userRepository.update(userId, {
       ...user,
       points: user.points - currentAmountDeducted,
     });
+    return response;
   }
 
   async increaseBalance(id: string, payment: RewardDto) {

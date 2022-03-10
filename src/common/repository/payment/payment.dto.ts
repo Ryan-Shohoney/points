@@ -1,4 +1,4 @@
-import {ApiProperty} from '@nestjs/swagger';
+import {ApiProperty, PickType} from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 
 export class PaymentDto {
@@ -21,4 +21,7 @@ export class RewardDto extends PaymentDto {
   receivedTs?: number;
 }
 
-export type Ledger = Array<RewardDto>;
+export class PaymentResponseDto extends PickType(RewardDto, ['payer']) {
+  deduction: number;
+  balance: number;
+}

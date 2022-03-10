@@ -81,8 +81,8 @@ export class BalanceController {
     description: `This will reduce the number of available points in a user\'s ledger. The oldest records in the ledger
     are used first`,
   })
-  @ApiNoContentResponse({
-    description: 'Returns an OK, signifying that reduction was successful',
+  @ApiOkResponse({
+    description: 'An array of the payers involved in the transaction, and their deducted amounts',
   })
   @ApiNotFoundResponse({
     description: 'No user with this ID was found',
@@ -92,7 +92,6 @@ export class BalanceController {
       'The user with the corresponding id does not have enough points to complete the payment, or the UUID passed failed to validate',
   })
   @Put(':userId/pay')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiParam({
     name: 'userId',
     type: 'string',
