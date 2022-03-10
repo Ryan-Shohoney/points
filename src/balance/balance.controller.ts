@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Put,
@@ -90,6 +92,7 @@ export class BalanceController {
       'The user with the corresponding id does not have enough points to complete the payment, or the UUID passed failed to validate',
   })
   @Put(':userId/pay')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiParam({
     name: 'userId',
     type: 'string',
@@ -116,6 +119,7 @@ export class BalanceController {
     description: 'The passed ID is not a valid UUID',
   })
   @Put(':userId/reward')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiParam({
     name: 'userId',
     type: 'string',

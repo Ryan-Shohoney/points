@@ -71,7 +71,7 @@ describe('E2E: UserController', () => {
     return request(app.getHttpServer())
       .put(`/user/${insertedUserId}`)
       .send({ lastName: 'updated' })
-      .expect(200);
+      .expect(204);
   });
 
   it('Throws an error when a forbidden parameter is present: /:id (PUT)', () => {
@@ -104,7 +104,7 @@ describe('E2E: UserController', () => {
   it('Deletes the correct user: /:id (DELETE)', () => {
     return request(app.getHttpServer())
       .del(`/user/${insertedUserId}`)
-      .expect(200);
+      .expect(204);
   });
 
   it('Reflects a deleted user', () => {

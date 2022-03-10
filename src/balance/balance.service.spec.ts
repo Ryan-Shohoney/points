@@ -61,11 +61,13 @@ describe('BalanceService', () => {
 
     it('throws an error if the user does not exist', async () => {
       mockUserRepository.findById.mockResolvedValueOnce(null);
-      await expect(service.userBalance('mocked')).rejects.toEqual(expect.objectContaining({
-        message: 'Not Found',
-        status: HttpStatus.NOT_FOUND,
-      }))
-    })
+      await expect(service.userBalance('mocked')).rejects.toEqual(
+        expect.objectContaining({
+          message: 'Not Found',
+          status: HttpStatus.NOT_FOUND,
+        }),
+      );
+    });
   });
 
   describe('increaseBalance()', () => {

@@ -41,11 +41,8 @@ $ yarn test
 # e2e tests
 $ yarn test:e2e
 
-# test coverage
+# test coverage (e2e and unit)
 $ yarn test:cov
-
-# TDD mode
-$ yarn test:watch
 ```
 
 ## API Documentation and Postman Collection

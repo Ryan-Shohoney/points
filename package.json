@@ -6,22 +6,17 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prebuild": "rimraf dist",
-    "build": "nest build",
+    "build": "rimraf dist && nest build",
     "format": "prettier --write \"src/**/*.ts\"",
-    "prestart": "yarn docker -d",
-    "start": "nest start",
+    "start": "yarn docker && nest start",
     "start:dev": "yarn start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "yarn node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest --config jest-unit.json",
-    "test:watch": "jest --watch",
     "test:cov": "yarn docker && jest --config jest-cov.json --coverage --runInBand",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "yarn docker && jest --config jest-e2e.json --runInBand",
-    "predocker": "docker compose down --remove-orphans --volumes",
-    "docker": "docker compose up -d"
+    "docker": "docker compose down --remove-orphans --volumes && docker compose up -d"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",

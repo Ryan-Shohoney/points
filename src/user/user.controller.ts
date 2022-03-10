@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -10,6 +12,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -73,7 +76,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Update a user with the passed id',
   })
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: 'The user was successfully updated',
   })
   @ApiNotFoundResponse({
@@ -83,6 +86,7 @@ export class UserController {
     description: 'The passed ID is not a valid UUID',
   })
   @Put(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiParam({
     name: 'id',
     type: 'string',
@@ -95,7 +99,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Delete a user with the passed id',
   })
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: 'The user was successfully deleted',
   })
   @ApiNotFoundResponse({
@@ -105,6 +109,7 @@ export class UserController {
     description: 'The passed ID is not a valid UUID',
   })
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiParam({
     name: 'id',
     type: 'string',
