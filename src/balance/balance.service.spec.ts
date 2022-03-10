@@ -1,6 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { mock, mockClear } from 'jest-mock-extended';
+import { LedgerRepository } from '../common/repository/ledger/ledger-repository.provider';
 import { PaymentRepository } from '../common/repository/payment/payment-repository.provider';
 import { UserRepository } from '../common/repository/user/user-repository.provider';
 import { BalanceService } from './balance.service';
@@ -14,7 +15,6 @@ describe('BalanceService', () => {
     id: '12345',
   };
   const mockPayer = {
-    userId: 'testId',
     amount: 500,
     payer: 'testPayer',
   };
@@ -26,6 +26,14 @@ describe('BalanceService', () => {
   const mockUserRepository = mock<UserRepository>({
     findById: jest.fn().mockResolvedValue(mockUser),
     update: jest.fn(),
+  });
+  const mockLedger = {
+    userId: mockUser.id,
+    paymentId: 'mockPaymentId',
+  };
+
+  const mockLedgerRepository = mock<LedgerRepository>({
+    findById: jest.fn().mockResolvedValue(mockLedger),
   });
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -39,6 +47,10 @@ describe('BalanceService', () => {
           provide: UserRepository,
           useValue: mockUserRepository,
         },
+        {
+          provide: LedgerRepository,
+          useValue: mockLedgerRepository,
+        },
       ],
     }).compile();
 
@@ -47,6 +59,7 @@ describe('BalanceService', () => {
   afterEach(() => {
     mockClear(mockPaymentRepository);
     mockClear(mockUserRepository);
+    mockClear(mockLedgerRepository);
   });
 
   it('should be defined', () => {
@@ -60,7 +73,7 @@ describe('BalanceService', () => {
     });
 
     it('throws an error if the user does not exist', async () => {
-      mockUserRepository.findById.mockResolvedValueOnce(null);
+      mockUserRepository.findById.mockImplementationOnce(() => null);
       await expect(service.userBalance('mocked')).rejects.toEqual(
         expect.objectContaining({
           message: 'Not Found',
@@ -73,14 +86,14 @@ describe('BalanceService', () => {
   describe('increaseBalance()', () => {
     it('updates the users points and adds a new payment', async () => {
       const mockPayment = {
-        userId: 'mocked',
         payer: 'TestPayer',
         amount: 1000,
+        timestampMS: 1,
       };
       await service.increaseBalance('mocked', mockPayment);
 
       expect(mockUserRepository.update).toHaveBeenCalledWith(
-        mockPayment.userId,
+        mockLedger.userId,
         { ...mockUser, points: 2000 },
       );
     });
@@ -88,7 +101,10 @@ describe('BalanceService', () => {
 
   describe('reduceBalance()', () => {
     it('throws an error when the user is not found', async () => {
-      mockUserRepository.findById.mockResolvedValueOnce(null);
+      mockLedgerRepository.findById.mockResolvedValueOnce({
+        userId: null,
+        paymentId: null,
+      });
       await expect(service.reduceBalance('notFound', 500)).rejects.toEqual(
         expect.objectContaining({
           message: 'Not Found',
@@ -100,33 +116,39 @@ describe('BalanceService', () => {
     it('reduces the user balance, using a payer with just enough points', async () => {
       await service.reduceBalance('mocked', 500);
       expect(mockPaymentRepository.getCurrentPayer).toHaveBeenCalledWith(
-        'mocked',
+        mockLedger.paymentId,
       );
       expect(mockPaymentRepository.getCurrentPayer).toHaveBeenCalledTimes(1);
       expect(mockPaymentRepository.updateCurrentPayer).toHaveBeenCalledWith(
-        'mocked',
+        mockLedger.paymentId,
         { ...mockPayer, amount: 0 },
       );
-      expect(mockUserRepository.update).toHaveBeenCalledWith('mocked', {
-        ...mockUser,
-        points: 500,
-      });
+      expect(mockUserRepository.update).toHaveBeenCalledWith(
+        mockLedger.userId,
+        {
+          ...mockUser,
+          points: 500,
+        },
+      );
     });
 
     it('reduces the user balance using a payer with more than enough points', async () => {
       await service.reduceBalance('mocked', 250);
       expect(mockPaymentRepository.getCurrentPayer).toHaveBeenCalledWith(
-        'mocked',
+        mockLedger.paymentId,
       );
       expect(mockPaymentRepository.getCurrentPayer).toHaveBeenCalledTimes(1);
       expect(mockPaymentRepository.updateCurrentPayer).toHaveBeenCalledWith(
-        'mocked',
+        mockLedger.paymentId,
         { ...mockPayer, amount: 250 },
       );
-      expect(mockUserRepository.update).toHaveBeenCalledWith('mocked', {
-        ...mockUser,
-        points: 750,
-      });
+      expect(mockUserRepository.update).toHaveBeenCalledWith(
+        mockLedger.userId,
+        {
+          ...mockUser,
+          points: 750,
+        },
+      );
     });
   });
 });

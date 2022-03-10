@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { mock, mockClear } from 'jest-mock-extended';
+import { LedgerRepository } from '../common/repository/ledger/ledger-repository.provider';
 import { PaymentRepository } from '../common/repository/payment/payment-repository.provider';
 import { UserRepository } from '../common/repository/user/user-repository.provider';
 import { UserDto } from '../common/repository/user/user.dto';
@@ -19,6 +20,7 @@ describe('UserService', () => {
     update: jest.fn(),
   });
   const mockPaymentRepository = mock<PaymentRepository>();
+  const mockLedgerRepository = mock<LedgerRepository>();
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -30,6 +32,10 @@ describe('UserService', () => {
         {
           provide: PaymentRepository,
           useValue: mockPaymentRepository,
+        },
+        {
+          provide: LedgerRepository,
+          useValue: mockLedgerRepository,
         },
       ],
     }).compile();
@@ -56,13 +62,11 @@ describe('UserService', () => {
         expect.objectContaining({ ...mockUser, points: 1000 }),
       );
       expect(mockPaymentRepository.insert).toHaveBeenCalledWith(
-        expect.objectContaining([
-          {
-            userId: 'mockId',
-            amount: 1000,
-            payer: 'Fetch Rewards',
-          },
-        ]),
+        expect.objectContaining({
+          amount: 1000,
+          payer: 'promotionalPoints',
+          timestampMS: 1,
+        }),
       );
     });
   });

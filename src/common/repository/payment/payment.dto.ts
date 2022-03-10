@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsUUID } from 'class-validator';
+import { ApiProperty, PickType } from '@nestjs/swagger';
+import { IsNumber, IsString } from 'class-validator';
 
 export class PaymentDto {
   @ApiProperty()
@@ -9,12 +9,19 @@ export class PaymentDto {
 
 export class RewardDto extends PaymentDto {
   @ApiProperty()
-  @IsUUID()
-  userId: string;
-
-  @ApiProperty()
   @IsString()
   payer: string;
+
+  @ApiProperty({
+    description: 'The number of milliseconds since the start of the Unix epoch',
+  })
+  @IsNumber()
+  timestampMS: number;
+
+  receivedTs?: number;
 }
 
-export type Ledger = Array<RewardDto>;
+export class PaymentResponseDto extends PickType(RewardDto, ['payer']) {
+  deduction: number;
+  balance: number;
+}

@@ -55,8 +55,7 @@ export class BalanceController {
     summary: 'Get the detailed ledger for a user with the passed userId',
   })
   @ApiOkResponse({
-    description:
-      'Return a number, representing the current balance for the user',
+    description: 'Return an array of each individual record in the ledger',
   })
   @ApiNotFoundResponse({
     description: 'No user with this ID was found, or the ledger is empty',
@@ -77,12 +76,31 @@ export class BalanceController {
   }
 
   @ApiOperation({
+    summary:
+      'Get the total number of points for each payer, in the users ledger',
+  })
+  @ApiOkResponse({
+    description: 'Returns an array of unique payers, with their total balance',
+  })
+  @ApiNotFoundResponse({
+    description: 'No user with this ID was found, or the ledger is empty',
+  })
+  @ApiBadRequestResponse({
+    description: 'The passed ID is not a valid UUID',
+  })
+  @Get(':userId/payer-balances')
+  public async payerBalances(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.balanceService.aggregateUserLedger(userId);
+  }
+
+  @ApiOperation({
     summary: 'Reduce the amount of points that the user has.',
     description: `This will reduce the number of available points in a user\'s ledger. The oldest records in the ledger
     are used first`,
   })
-  @ApiNoContentResponse({
-    description: 'Returns an OK, signifying that reduction was successful',
+  @ApiOkResponse({
+    description:
+      'An array of the payers involved in the transaction, and their deducted amounts',
   })
   @ApiNotFoundResponse({
     description: 'No user with this ID was found',
@@ -92,7 +110,6 @@ export class BalanceController {
       'The user with the corresponding id does not have enough points to complete the payment, or the UUID passed failed to validate',
   })
   @Put(':userId/pay')
-  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiParam({
     name: 'userId',
     type: 'string',
