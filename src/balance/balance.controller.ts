@@ -55,8 +55,7 @@ export class BalanceController {
     summary: 'Get the detailed ledger for a user with the passed userId',
   })
   @ApiOkResponse({
-    description:
-      'Return an array of each individual record in the ledger',
+    description: 'Return an array of each individual record in the ledger',
   })
   @ApiNotFoundResponse({
     description: 'No user with this ID was found, or the ledger is empty',
@@ -77,11 +76,11 @@ export class BalanceController {
   }
 
   @ApiOperation({
-    summary: 'Get the total number of points for each payer, in the users ledger',
+    summary:
+      'Get the total number of points for each payer, in the users ledger',
   })
   @ApiOkResponse({
-    description:
-      'Returns an array of unique payers, with their total balance',
+    description: 'Returns an array of unique payers, with their total balance',
   })
   @ApiNotFoundResponse({
     description: 'No user with this ID was found, or the ledger is empty',
@@ -90,9 +89,7 @@ export class BalanceController {
     description: 'The passed ID is not a valid UUID',
   })
   @Get(':userId/payer-balances')
-  public async payerBalances(
-    @Param('userId', ParseUUIDPipe) userId: string,
-  ) {
+  public async payerBalances(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.balanceService.aggregateUserLedger(userId);
   }
 
@@ -102,7 +99,8 @@ export class BalanceController {
     are used first`,
   })
   @ApiOkResponse({
-    description: 'An array of the payers involved in the transaction, and their deducted amounts',
+    description:
+      'An array of the payers involved in the transaction, and their deducted amounts',
   })
   @ApiNotFoundResponse({
     description: 'No user with this ID was found',

@@ -59,23 +59,27 @@ describe('E2E: BalanceController', () => {
   });
 
   it('Adds payments: /balance/:id/reward (PUT)', async () => {
-    await request(app.getHttpServer()).put(`/balance/${userId}/reward`).send({
-      amount: 500,
-      payer: 'NestJS',
-      timestampMS: Date.now() - ONE_DAY
-    });
+    await request(app.getHttpServer())
+      .put(`/balance/${userId}/reward`)
+      .send({
+        amount: 500,
+        payer: 'NestJS',
+        timestampMS: Date.now() - ONE_DAY,
+      });
 
     await request(app.getHttpServer()).put(`/balance/${userId}/reward`).send({
       amount: 200,
       payer: 'NodeJS',
-      timestampMS: Date.now()
+      timestampMS: Date.now(),
     });
 
-    await request(app.getHttpServer()).put(`/balance/${userId}/reward`).send({
-      amount: 200,
-      payer: 'NodeJS',
-      timestampMS: Date.now() - 1000
-    });
+    await request(app.getHttpServer())
+      .put(`/balance/${userId}/reward`)
+      .send({
+        amount: 200,
+        payer: 'NodeJS',
+        timestampMS: Date.now() - 1000,
+      });
 
     return request(app.getHttpServer())
       .get(`/balance/${userId}`)
@@ -94,18 +98,19 @@ describe('E2E: BalanceController', () => {
   });
 
   it('Returns an aggregated ledger: /balance/:id/payer-balances', async () => {
-
     await request(app.getHttpServer())
       .get(`/balance/${userId}/payer-balances`)
       .expect(200)
-      .then(({body}) => {
-        expect(body).toEqual(expect.objectContaining({
-          promotionalPoints: 1000,
-          NodeJS: 400,
-          NestJS: 500,
-        }))
-      })
-  })
+      .then(({ body }) => {
+        expect(body).toEqual(
+          expect.objectContaining({
+            promotionalPoints: 1000,
+            NodeJS: 400,
+            NestJS: 500,
+          }),
+        );
+      });
+  });
 
   it('Handles payments higher than the available balance: /balance/:id/pay (PUT)', async () => {
     return request(app.getHttpServer())

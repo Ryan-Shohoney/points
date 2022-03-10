@@ -38,7 +38,12 @@ export class UserRepository implements IRepository<UserDto> {
     const id = uuid();
     await Promise.all([
       this.dataStore.client.sadd(this.keyPrefix, id),
-      this.dataStore.client.hset(this.generateKey(id), { firstName, lastName, points, id }),
+      this.dataStore.client.hset(this.generateKey(id), {
+        firstName,
+        lastName,
+        points,
+        id,
+      }),
     ]);
 
     return id;
@@ -54,7 +59,10 @@ export class UserRepository implements IRepository<UserDto> {
   async update(id: string, entity: UpdateUserDto): Promise<boolean> {
     const current = await this.dataStore.client.hgetall(this.generateKey(id));
     const merged = { ...current, ...entity };
-    const numUpdated = await this.dataStore.client.hset(this.generateKey(id), merged);
+    const numUpdated = await this.dataStore.client.hset(
+      this.generateKey(id),
+      merged,
+    );
     return numUpdated > 0;
   }
 
@@ -68,6 +76,6 @@ export class UserRepository implements IRepository<UserDto> {
   }
 
   private generateKey(k: string): string {
-    return `${this.keyPrefix}:${k}`
+    return `${this.keyPrefix}:${k}`;
   }
 }

@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { mock, mockClear } from 'jest-mock-extended';
-import {LedgerRepository} from '../common/repository/ledger/ledger-repository.provider';
+import { LedgerRepository } from '../common/repository/ledger/ledger-repository.provider';
 import { PaymentRepository } from '../common/repository/payment/payment-repository.provider';
 import { UserRepository } from '../common/repository/user/user-repository.provider';
 import { BalanceService } from './balance.service';
@@ -28,12 +28,13 @@ describe('BalanceService', () => {
     update: jest.fn(),
   });
   const mockLedger = {
-    userId: mockUser.id, paymentId: 'mockPaymentId'
+    userId: mockUser.id,
+    paymentId: 'mockPaymentId',
   };
 
   const mockLedgerRepository = mock<LedgerRepository>({
-    findById: jest.fn().mockResolvedValue(mockLedger)
-  })
+    findById: jest.fn().mockResolvedValue(mockLedger),
+  });
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -49,7 +50,7 @@ describe('BalanceService', () => {
         {
           provide: LedgerRepository,
           useValue: mockLedgerRepository,
-        }
+        },
       ],
     }).compile();
 
@@ -87,7 +88,7 @@ describe('BalanceService', () => {
       const mockPayment = {
         payer: 'TestPayer',
         amount: 1000,
-        timestampMS: 1
+        timestampMS: 1,
       };
       await service.increaseBalance('mocked', mockPayment);
 
@@ -100,7 +101,10 @@ describe('BalanceService', () => {
 
   describe('reduceBalance()', () => {
     it('throws an error when the user is not found', async () => {
-      mockLedgerRepository.findById.mockResolvedValueOnce({ userId: null, paymentId: null })
+      mockLedgerRepository.findById.mockResolvedValueOnce({
+        userId: null,
+        paymentId: null,
+      });
       await expect(service.reduceBalance('notFound', 500)).rejects.toEqual(
         expect.objectContaining({
           message: 'Not Found',
@@ -119,10 +123,13 @@ describe('BalanceService', () => {
         mockLedger.paymentId,
         { ...mockPayer, amount: 0 },
       );
-      expect(mockUserRepository.update).toHaveBeenCalledWith(mockLedger.userId, {
-        ...mockUser,
-        points: 500,
-      });
+      expect(mockUserRepository.update).toHaveBeenCalledWith(
+        mockLedger.userId,
+        {
+          ...mockUser,
+          points: 500,
+        },
+      );
     });
 
     it('reduces the user balance using a payer with more than enough points', async () => {
@@ -135,10 +142,13 @@ describe('BalanceService', () => {
         mockLedger.paymentId,
         { ...mockPayer, amount: 250 },
       );
-      expect(mockUserRepository.update).toHaveBeenCalledWith(mockLedger.userId, {
-        ...mockUser,
-        points: 750,
-      });
+      expect(mockUserRepository.update).toHaveBeenCalledWith(
+        mockLedger.userId,
+        {
+          ...mockUser,
+          points: 750,
+        },
+      );
     });
   });
 });

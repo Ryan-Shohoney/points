@@ -1,6 +1,6 @@
-import {Module} from '@nestjs/common';
-import {StoreModule} from '../../store/store.module';
-import {LedgerRepository} from './ledger-repository.provider';
+import { Module } from '@nestjs/common';
+import { StoreModule } from '../../store/store.module';
+import { LedgerRepository } from './ledger-repository.provider';
 
 @Module({
   imports: [StoreModule],

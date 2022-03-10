@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { mock, mockClear } from 'jest-mock-extended';
-import {LedgerRepository} from '../common/repository/ledger/ledger-repository.provider';
+import { LedgerRepository } from '../common/repository/ledger/ledger-repository.provider';
 import { PaymentRepository } from '../common/repository/payment/payment-repository.provider';
 import { UserRepository } from '../common/repository/user/user-repository.provider';
 import { UserDto } from '../common/repository/user/user.dto';
@@ -36,7 +36,7 @@ describe('UserService', () => {
         {
           provide: LedgerRepository,
           useValue: mockLedgerRepository,
-        }
+        },
       ],
     }).compile();
 
@@ -62,13 +62,11 @@ describe('UserService', () => {
         expect.objectContaining({ ...mockUser, points: 1000 }),
       );
       expect(mockPaymentRepository.insert).toHaveBeenCalledWith(
-        expect.objectContaining(
-          {
-            amount: 1000,
-            payer: 'promotionalPoints',
-            timestampMS: 1,
-          },
-        ),
+        expect.objectContaining({
+          amount: 1000,
+          payer: 'promotionalPoints',
+          timestampMS: 1,
+        }),
       );
     });
   });

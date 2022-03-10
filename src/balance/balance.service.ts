@@ -1,7 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import {LedgerRepository} from '../common/repository/ledger/ledger-repository.provider';
+import { LedgerRepository } from '../common/repository/ledger/ledger-repository.provider';
 import { PaymentRepository } from '../common/repository/payment/payment-repository.provider';
-import {PaymentResponseDto, RewardDto} from '../common/repository/payment/payment.dto';
+import {
+  PaymentResponseDto,
+  RewardDto,
+} from '../common/repository/payment/payment.dto';
 import { UserRepository } from '../common/repository/user/user-repository.provider';
 
 @Injectable()
@@ -33,18 +36,21 @@ export class BalanceService {
 
   async aggregateUserLedger(userId: string) {
     const ledger = await this.userLedger(userId);
-    const aggregates: { [key:string]: number } = {};
-    ledger.forEach(l => {
-      if(aggregates[l.payer]) {
-        aggregates[l.payer] += l.amount
+    const aggregates: { [key: string]: number } = {};
+    ledger.forEach((l) => {
+      if (aggregates[l.payer]) {
+        aggregates[l.payer] += l.amount;
       } else {
-        aggregates[l.payer] = l.amount
+        aggregates[l.payer] = l.amount;
       }
-    })
+    });
     return aggregates;
   }
 
-  async reduceBalance(id: string, amount: number): Promise<Array<PaymentResponseDto>> {
+  async reduceBalance(
+    id: string,
+    amount: number,
+  ): Promise<Array<PaymentResponseDto>> {
     const { userId, paymentId } = await this.ledgerRepository.findById(id);
     if (!userId) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -57,10 +63,12 @@ export class BalanceService {
       );
     }
     let currentAmountDeducted = 0;
-    let response: Array<PaymentResponseDto> = [];
+    const response: Array<PaymentResponseDto> = [];
     while (currentAmountDeducted < amount) {
       const remainingPayment = amount - currentAmountDeducted;
-      const currentPayer = await this.paymentRepository.getCurrentPayer(paymentId);
+      const currentPayer = await this.paymentRepository.getCurrentPayer(
+        paymentId,
+      );
       const deduction =
         currentPayer.amount <= remainingPayment
           ? currentPayer.amount
@@ -75,7 +83,7 @@ export class BalanceService {
         balance: updatedPayer.amount,
         payer: updatedPayer.payer,
       };
-      response.push(responseObject)
+      response.push(responseObject);
       await this.paymentRepository.updateCurrentPayer(paymentId, updatedPayer);
     }
     await this.userRepository.update(userId, {

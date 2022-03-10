@@ -1,7 +1,7 @@
-import {Injectable} from '@nestjs/common';
-import {RedisStore} from '../../store/redis-store';
-import {IRepository} from '../../store/store.types';
-import {LedgerDto} from './ledger.dto';
+import { Injectable } from '@nestjs/common';
+import { RedisStore } from '../../store/redis-store';
+import { IRepository } from '../../store/store.types';
+import { LedgerDto } from './ledger.dto';
 
 @Injectable()
 export class LedgerRepository implements IRepository<LedgerDto> {
@@ -10,7 +10,7 @@ export class LedgerRepository implements IRepository<LedgerDto> {
 
   async delete(id: string): Promise<boolean> {
     const { userId } = await this.findById(id);
-    if(!userId) {
+    if (!userId) {
       return false;
     }
     await this.dataStore.client.del(this.generateKey(id));
@@ -19,7 +19,9 @@ export class LedgerRepository implements IRepository<LedgerDto> {
   }
 
   async findById(id: string): Promise<LedgerDto> {
-    const { paymentId, userId, } = await this.dataStore.client.hgetall(this.generateKey(id));
+    const { paymentId, userId } = await this.dataStore.client.hgetall(
+      this.generateKey(id),
+    );
     return {
       paymentId,
       userId,
@@ -35,6 +37,6 @@ export class LedgerRepository implements IRepository<LedgerDto> {
   }
 
   private generateKey(k: string): string {
-    return `${this.keyPrefix}:${k}`
+    return `${this.keyPrefix}:${k}`;
   }
 }

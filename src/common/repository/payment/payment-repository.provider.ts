@@ -5,7 +5,9 @@ import { IRepository } from '../../store/store.types';
 import { RewardDto, PaymentDto } from './payment.dto';
 
 @Injectable()
-export class PaymentRepository implements IRepository<RewardDto | Array<RewardDto>> {
+export class PaymentRepository
+  implements IRepository<RewardDto | Array<RewardDto>>
+{
   public readonly keyPrefix = 'payment';
   constructor(private readonly dataStore: RedisStore) {}
 
@@ -19,8 +21,8 @@ export class PaymentRepository implements IRepository<RewardDto | Array<RewardDt
   }
 
   async updateCurrentPayer(id: string, payment: PaymentDto): Promise<boolean> {
-    const entry = await this.dataStore.client.zpopmin(this.generateKey(id), 1)
-    if(payment.amount > 0) {
+    const entry = await this.dataStore.client.zpopmin(this.generateKey(id), 1);
+    if (payment.amount > 0) {
       const newEntry = JSON.parse(entry[0]) as RewardDto;
       await this.dataStore.client.zadd(
         this.generateKey(id),
@@ -43,7 +45,7 @@ export class PaymentRepository implements IRepository<RewardDto | Array<RewardDt
       0,
       -1,
     );
-    return ledger.map(x => JSON.parse(x) as RewardDto);
+    return ledger.map((x) => JSON.parse(x) as RewardDto);
   }
 
   async insert(entity: RewardDto): Promise<string> {
@@ -55,7 +57,7 @@ export class PaymentRepository implements IRepository<RewardDto | Array<RewardDt
     await this.dataStore.client.zadd(
       this.generateKey(id),
       entity.timestampMS,
-      JSON.stringify({ ...entity, receivedTs: Date.now()}),
+      JSON.stringify({ ...entity, receivedTs: Date.now() }),
     );
     return id;
   }

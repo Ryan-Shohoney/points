@@ -1,4 +1,4 @@
-import {ApiProperty, PickType} from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 
 export class PaymentDto {
@@ -13,7 +13,7 @@ export class RewardDto extends PaymentDto {
   payer: string;
 
   @ApiProperty({
-    description: 'The number of milliseconds since the start of the Unix epoch'
+    description: 'The number of milliseconds since the start of the Unix epoch',
   })
   @IsNumber()
   timestampMS: number;
