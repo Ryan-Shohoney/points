@@ -31,6 +31,19 @@ export class BalanceService {
     return payment;
   }
 
+  async aggregateUserLedger(userId: string) {
+    const ledger = await this.userLedger(userId);
+    const aggregates: { [key:string]: number } = {};
+    ledger.forEach(l => {
+      if(aggregates[l.payer]) {
+        aggregates[l.payer] += l.amount
+      } else {
+        aggregates[l.payer] = l.amount
+      }
+    })
+    return aggregates;
+  }
+
   async reduceBalance(id: string, amount: number): Promise<Array<PaymentResponseDto>> {
     const { userId, paymentId } = await this.ledgerRepository.findById(id);
     if (!userId) {

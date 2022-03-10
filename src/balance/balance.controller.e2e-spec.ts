@@ -71,10 +71,16 @@ describe('E2E: BalanceController', () => {
       timestampMS: Date.now()
     });
 
+    await request(app.getHttpServer()).put(`/balance/${userId}/reward`).send({
+      amount: 200,
+      payer: 'NodeJS',
+      timestampMS: Date.now() - 1000
+    });
+
     return request(app.getHttpServer())
       .get(`/balance/${userId}`)
       .then(({ text }) => {
-        expect(parseInt(text, 10)).toEqual(1700);
+        expect(parseInt(text, 10)).toEqual(1900);
       });
   });
 
@@ -83,9 +89,23 @@ describe('E2E: BalanceController', () => {
       .get(`/balance/${userId}/detailed`)
       .expect(200)
       .then(({ body }) => {
-        expect(body).toHaveLength(3);
+        expect(body).toHaveLength(4);
       });
   });
+
+  it('Returns an aggregated ledger: /balance/:id/payer-balances', async () => {
+
+    await request(app.getHttpServer())
+      .get(`/balance/${userId}/payer-balances`)
+      .expect(200)
+      .then(({body}) => {
+        expect(body).toEqual(expect.objectContaining({
+          promotionalPoints: 1000,
+          NodeJS: 400,
+          NestJS: 500,
+        }))
+      })
+  })
 
   it('Handles payments higher than the available balance: /balance/:id/pay (PUT)', async () => {
     return request(app.getHttpServer())
@@ -102,7 +122,7 @@ describe('E2E: BalanceController', () => {
     return request(app.getHttpServer())
       .get(`/balance/${userId}`)
       .then(({ text }) => {
-        expect(parseInt(text, 10)).toEqual(600);
+        expect(parseInt(text, 10)).toEqual(800);
       });
   });
 
@@ -111,7 +131,7 @@ describe('E2E: BalanceController', () => {
       .get(`/balance/${userId}/detailed`)
       .expect(200)
       .then(({ body }) => {
-        expect(body).toHaveLength(2);
+        expect(body).toHaveLength(3);
       });
   });
 
